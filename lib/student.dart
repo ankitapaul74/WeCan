@@ -64,15 +64,6 @@ class _StudentsPageState extends State<StudentsPage> {
   }
 
   Future<void> _addStudent() async {
-    if (!isLoggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You need to log in to add a student.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
 
     showModalBottomSheet(
       context: context,
@@ -161,15 +152,6 @@ class _StudentsPageState extends State<StudentsPage> {
   }
 
   Future<void> _deleteStudent(String studentId) async {
-    if (!isLoggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You need to log in to delete a student.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
 
     showDialog(
       context: context,
@@ -273,20 +255,20 @@ class _StudentsPageState extends State<StudentsPage> {
                       ),
                     );
                   },
-                  onLongPress: () {
+                  onLongPress: isLoggedIn?() {
                     _deleteStudent(student.id);
-                  },
+                  }:null,
                 ),
               );
             },
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: isLoggedIn? FloatingActionButton(
         backgroundColor: Colors.blue,
         onPressed: _addStudent,
         child: Icon(Icons.add, color: Colors.white),
-      ),
+      ):null,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,

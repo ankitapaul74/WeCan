@@ -26,7 +26,6 @@ class _CarouselPageState extends State<CarouselPage> {
     _checkLoginStatus();
   }
 
-  // Check login status
   Future<void> _checkLoginStatus() async {
     final user = FirebaseAuth.instance.currentUser;
     setState(() {
@@ -34,31 +33,7 @@ class _CarouselPageState extends State<CarouselPage> {
     });
   }
 
-  // Show login prompt dialog
-  void _showLoginDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Login Required'),
-        content: const Text('You need to log in to upload or delete images.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close the dialog
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Upload image logic
   Future<void> _uploadImages() async {
-    if (!isLoggedIn) {
-      _showLoginDialog(); // Show login dialog if not logged in
-      return;
-    }
 
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -83,10 +58,6 @@ class _CarouselPageState extends State<CarouselPage> {
 
   // Delete image logic
   Future<void> _deleteImages(String docId) async {
-    if (!isLoggedIn) {
-      _showLoginDialog(); // Show login dialog if not logged in
-      return;
-    }
 
     try {
       await carouselCollection.doc(docId).delete();
@@ -102,10 +73,6 @@ class _CarouselPageState extends State<CarouselPage> {
 
   // Show delete confirmation dialog
   void _showDeleteConfirmation(String docId) {
-    if (!isLoggedIn) {
-      _showLoginDialog(); // Show login dialog if not logged in
-      return;
-    }
 
     showDialog(
       context: context,
@@ -153,7 +120,7 @@ class _CarouselPageState extends State<CarouselPage> {
         color: Colors.grey[100],
         child: Column(
           children: [
-            // Upload button is disabled if the user is not logged in
+            if(isLoggedIn)
             ElevatedButton.icon(
               onPressed: isLoggedIn ? _uploadImages : null,
               icon: const Icon(

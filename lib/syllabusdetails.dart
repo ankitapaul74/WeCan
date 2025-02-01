@@ -54,16 +54,6 @@ class _SubjectDetailsState extends State<SubjectDetails> {
   }
 
   void toggleEditing() async {
-    if (!isLoggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You need to log in to modify the syllabus.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     setState(() {
       if (isEditing) {
         title = _titleController.text.trim();

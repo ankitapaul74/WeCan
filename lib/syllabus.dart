@@ -36,10 +36,6 @@ class _SyllabusState extends State<Syllabus> {
   }
 
   Future<void> _addClass() async {
-    if (_currentUser == null) {
-      _showLoginMessage();
-      return;
-    }
 
     showModalBottomSheet(
       context: context,
@@ -126,10 +122,6 @@ class _SyllabusState extends State<Syllabus> {
   }
 
   Future<void> _deleteClass(String classId) async {
-    if (_currentUser == null) {
-      _showLoginMessage();
-      return;
-    }
 
     showDialog(
       context: context,
@@ -187,14 +179,6 @@ class _SyllabusState extends State<Syllabus> {
     );
   }
 
-  void _showLoginMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('You need to log in to modify data.'),
-        backgroundColor: Colors.redAccent,
-      ),
-    );
-  }
 
   void _onTabTapped(int index) {
     setState(() {
@@ -290,9 +274,9 @@ class _SyllabusState extends State<Syllabus> {
                       ),
                     );
                   },
-                  onLongPress: () {
+                  onLongPress:_currentUser!=null? () {
                     _deleteClass(name.id);
-                  },
+                  }:null,
                   trailing: Icon(Icons.chevron_right, color: Colors.yellow.shade800),
                 ),
               );
@@ -300,11 +284,11 @@ class _SyllabusState extends State<Syllabus> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: _currentUser!=null?FloatingActionButton(
         backgroundColor: Colors.yellow.shade700,
         onPressed: _addClass,
         child: Icon(Icons.add, color: Colors.white),
-      ),
+      ):null,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,

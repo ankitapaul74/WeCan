@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,19 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
   final TextEditingController _contentController = TextEditingController();
   final CollectionReference studentsCollection =
   FirebaseFirestore.instance.collection('students');
+  bool isloggedIn=false;
+
+  Future<void> _checkLoginStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    setState(() {
+      isloggedIn = user != null;
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();  // Check login status when the page is loaded
+  }
 
   Future<void> _addNote() async {
     final content = _contentController.text.trim();
@@ -181,13 +195,13 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                                 ),
                                 Align(
                                   alignment: Alignment.bottomRight,
-                                  child: IconButton(
+                                  child: isloggedIn?IconButton(
                                     onPressed: () {
                                       _confirmDelete(note.reference);
                                     },
                                     icon: Icon(Icons.delete, color: Colors.grey),
                                     iconSize: 20,
-                                  ),
+                                  ):SizedBox.shrink(),
                                 ),
                               ],
                             ),
@@ -202,7 +216,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: isloggedIn?FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
               context,
@@ -212,7 +226,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
         label: Text('Add Lesson', style: TextStyle(color: Colors.white)),
         icon: Icon(Icons.add, color: Colors.white),
         backgroundColor: Colors.blue,
-      ),
+      ):null,
     );
   }
 

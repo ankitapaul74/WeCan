@@ -51,15 +51,6 @@ class _NotedetailsPageState extends State<NotedetailsPage> {
   }
 
   void toggleEditing() async {
-    if (!isLoggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You need to log in to edit this note.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
 
     setState(() {
       isEditing = !isEditing;
@@ -67,16 +58,6 @@ class _NotedetailsPageState extends State<NotedetailsPage> {
   }
 
   Future<void> _saveNote() async {
-    if (!isLoggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You need to log in to save changes.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     setState(() {
       title = DateFormat('dd MMM, yyyy').format(DateTime.now());
       content = _contentController.text.trim();
@@ -121,7 +102,7 @@ class _NotedetailsPageState extends State<NotedetailsPage> {
         backgroundColor: Colors.blue.shade600,
         elevation: 4,
         actions: [
-          if (!isEditing)
+          if (isLoggedIn&&!isEditing)
             IconButton(
               onPressed: toggleEditing,
               icon: const Icon(Icons.edit, color: Colors.white),

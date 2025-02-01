@@ -38,20 +38,9 @@ class _SubjectNameState extends State<SubjectName> {
     });
   }
 
-  void _showLoginMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('You need to log in to modify data.'),
-        backgroundColor: Colors.redAccent,
-      ),
-    );
-  }
 
   void _confirmDelete(DocumentReference subjectReference) {
-    if (_currentUser == null) {
-      _showLoginMessage();
-      return;
-    }
+
 
     showDialog(
       context: context,
@@ -262,14 +251,14 @@ class _SubjectNameState extends State<SubjectName> {
                                 child: Align(
                                   alignment: Alignment.bottomRight,
                                   child: IconButton(
-                                    onPressed: () {
+                                    onPressed: _currentUser!=null?() {
                                       _confirmDelete(subject.reference);
-                                    },
-                                    icon: const Icon(
+                                    }:null,
+                                    icon: _currentUser!=null? Icon(
                                       Icons.delete_outline_outlined,
                                       size: 20,
                                       color: Colors.grey,
-                                    ),
+                                    ):SizedBox.shrink(),
                                   ),
                                 ),
                               ),
@@ -285,12 +274,8 @@ class _SubjectNameState extends State<SubjectName> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: _currentUser!=null ?FloatingActionButton.extended(
         onPressed: () {
-          if (_currentUser == null) {
-            _showLoginMessage();
-            return;
-          }
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -307,7 +292,7 @@ class _SubjectNameState extends State<SubjectName> {
           color: Colors.white,
         ),
         backgroundColor: Colors.yellow.shade800,
-      ),
+      ):null,
     );
   }
 }

@@ -46,16 +46,6 @@ class _VolunteerEditPageState extends State<VolunteerEditPage> {
   }
 
   void toggleEditing() async {
-    if (currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('You need to log in to edit volunteers.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     setState(() {
       if (isEditing) {
         volunteers = _volunteerControllers
@@ -86,32 +76,12 @@ class _VolunteerEditPageState extends State<VolunteerEditPage> {
   }
 
   void addVolunteerField() {
-    if (currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('You need to log in to add volunteers.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     setState(() {
       _volunteerControllers.add(TextEditingController());
     });
   }
 
   void removeVolunteerField(int index) {
-    if (currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('You need to log in to remove volunteers.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     setState(() {
       _volunteerControllers[index].dispose();
       _volunteerControllers.removeAt(index);
@@ -223,7 +193,7 @@ class _VolunteerEditPageState extends State<VolunteerEditPage> {
                             },
                           ),
                         ),
-                        if (isEditing)
+                        if (isEditing && currentUser != null)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 20.0),
                             child: Align(
@@ -250,28 +220,29 @@ class _VolunteerEditPageState extends State<VolunteerEditPage> {
                               ),
                             ),
                           ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 20.0),
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: ElevatedButton(
-                              onPressed: toggleEditing,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 30, vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                        if (currentUser != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 20.0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: ElevatedButton(
+                                onPressed: toggleEditing,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 30, vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 8,
                                 ),
-                                elevation: 8,
-                              ),
-                              child: Text(
-                                isEditing ? "Save Changes" : "Edit",
-                                style: TextStyle(fontSize: 18, color: Colors.white),
+                                child: Text(
+                                  isEditing ? "Save Changes" : "Edit",
+                                  style: TextStyle(fontSize: 18, color: Colors.white),
+                                ),
                               ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),

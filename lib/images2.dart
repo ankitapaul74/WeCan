@@ -14,38 +14,25 @@ class GalleryPage extends StatefulWidget {
 
 class _GalleryPageState extends State<GalleryPage> {
   int _currentIndex = 2;
+  bool isLoggedIn = false; // Initialize the login status
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CloudinaryImageService>().fetchImages();
     });
+    _checkLoginStatus();  // Check login status when the page loads
   }
 
-
-  void _showLoginDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Login Required'),
-        content: const Text('You need to log in to upload or delete images.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close the dialog
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Function to check if the user is logged in
-  bool _isLoggedIn() {
+  // Method to check login status
+  Future<void> _checkLoginStatus() async {
     final user = FirebaseAuth.instance.currentUser;
-    return user != null;
+    setState(() {
+      isLoggedIn = user != null;  // Update the login status
+    });
   }
+
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -76,7 +63,6 @@ class _GalleryPageState extends State<GalleryPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,16 +77,13 @@ class _GalleryPageState extends State<GalleryPage> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.add_a_photo),
-            onPressed: () {
-              if (!_isLoggedIn()) {
-                _showLoginDialog(); // Show login dialog if not logged in
-              } else {
+          if (isLoggedIn)  // Show the button only if logged in
+            IconButton(
+              icon: Icon(Icons.add_a_photo),
+              onPressed: () {
                 context.read<CloudinaryImageService>().uploadImage();
-              }
-            },
-          ),
+              },
+            ),
         ],
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
@@ -214,7 +197,6 @@ class FullImageView extends StatelessWidget {
 
   const FullImageView({required this.image});
 
-
   void _showLoginDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -233,7 +215,6 @@ class FullImageView extends StatelessWidget {
     );
   }
 
-  // Function to check if the user is logged in
   bool _isLoggedIn() {
     final user = FirebaseAuth.instance.currentUser;
     return user != null;
@@ -248,12 +229,10 @@ class FullImageView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         actions: [
-          IconButton(
-            icon: Icon(Icons.delete, color: Colors.red),
-            onPressed: () async {
-              if (!_isLoggedIn()) {
-                _showLoginDialog(context); // Show login dialog if not logged in
-              } else {
+          if (_isLoggedIn())  // Show the delete icon only if logged in
+            IconButton(
+              icon: Icon(Icons.delete, color: Colors.red),
+              onPressed: () async {
                 final bool confirm = await showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
@@ -282,9 +261,8 @@ class FullImageView extends StatelessWidget {
                   await context.read<CloudinaryImageService>().deleteImage(imageId);
                   Navigator.of(context).pop();
                 }
-              }
-            },
-          ),
+              },
+            ),
         ],
       ),
       body: Center(
@@ -311,7 +289,6 @@ class FullImageView extends StatelessWidget {
         ),
       ),
       backgroundColor: Colors.black,
-
     );
   }
 }

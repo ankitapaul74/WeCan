@@ -1,3 +1,4 @@
+import 'package:WeCan/homescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
@@ -38,6 +39,36 @@ class _LoginScreenState extends State<LoginScreen> {
         content: Text('Logged out successfully!'),
       ),
     );
+  }
+
+  Future<void> _login() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+        _checkUserLoggedIn();
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Homescreen()),
+        );
+      } on FirebaseAuthException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? 'Login failed!'),
+          ),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -181,32 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: ElevatedButton(
                                   onPressed: _isLoading
                                       ? null
-                                      : () async {
-                                    if (_formKey.currentState?.validate() ?? false) {
-                                      setState(() {
-                                        _isLoading = true;
-                                      });
-                                      try {
-                                        UserCredential userCredential = await FirebaseAuth
-                                            .instance
-                                            .signInWithEmailAndPassword(
-                                          email: _emailController.text.trim(),
-                                          password: _passwordController.text.trim(),
-                                        );
-                                        _checkUserLoggedIn();
-                                      } on FirebaseAuthException catch (e) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(e.message ?? 'Login failed!'),
-                                          ),
-                                        );
-                                      } finally {
-                                        setState(() {
-                                          _isLoading = false;
-                                        });
-                                      }
-                                    }
-                                  },
+                                      : _login,
                                   style: ElevatedButton.styleFrom(
                                     padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                                     backgroundColor: Colors.teal.shade700,
@@ -215,13 +221,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                   child: _isLoading
-                                      ? CircularProgressIndicator(
-                                    color: Colors.white,
-                                  )
+                                      ? CircularProgressIndicator(color: Colors.white)
                                       : Text(
                                     "Login",
-                                    style: GoogleFonts.poppins(
-                                        fontSize: 18, color: Colors.white),
+                                    style: GoogleFonts.poppins(fontSize: 18, color: Colors.white),
                                   ),
                                 ),
                               ),
