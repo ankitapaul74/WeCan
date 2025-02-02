@@ -1,3 +1,4 @@
+import 'package:WeCan/syllabus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -46,7 +47,7 @@ class _StudentsPageState extends State<StudentsPage> {
         );
         break;
       case 1:
-      // Already on the Syllabus page, do nothing
+       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Syllabus()));
         break;
       case 2:
         Navigator.pushReplacement(
@@ -55,10 +56,6 @@ class _StudentsPageState extends State<StudentsPage> {
         );
         break;
       case 3:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => StudentsPage()),
-        );
         break;
     }
   }

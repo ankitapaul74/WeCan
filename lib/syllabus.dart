@@ -193,7 +193,6 @@ class _SyllabusState extends State<Syllabus> {
         );
         break;
       case 1:
-      // Already on the Syllabus page, do nothing
         break;
       case 2:
         Navigator.pushReplacement(
