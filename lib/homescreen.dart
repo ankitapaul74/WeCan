@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:WeCan/loginscreen.dart';
+import 'package:WeCan/our_leaders.dart';
 import 'package:WeCan/student.dart';
 import 'package:WeCan/syllabus.dart';
 import 'package:WeCan/volunteers.dart';
@@ -19,6 +20,7 @@ class _HomescreenState extends State<Homescreen> {
   int _currentIndex = 0;
 
   void _onTabTapped(int index) {
+    if(index==_currentIndex) return;
     if (index == 3) {
       Navigator.push(context, MaterialPageRoute(builder: (context) => StudentsPage()));
     } else if (index == 1) {
@@ -202,6 +204,16 @@ class HomeScreenContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: TodayCard(day: today),
           ),
+          SizedBox(height: 16.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: OurLeadersCard(onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => OurLeadersScreen()),
+              );
+            },),
+          ),
         ],
       ),
     );
@@ -209,82 +221,142 @@ class HomeScreenContent extends StatelessWidget {
 }
 
 
-class EnhancedCarousel extends StatelessWidget {
+class EnhancedCarousel extends StatefulWidget {
   final List<String> base64Images;
-
   EnhancedCarousel({required this.base64Images});
 
   @override
+  _EnhancedCarouselState createState() => _EnhancedCarouselState();
+}
+
+class _EnhancedCarouselState extends State<EnhancedCarousel> {
+  int _currentSlide = 0;
+
+  @override
   Widget build(BuildContext context) {
-    int _currentSlide = 0;
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return Column(
-          children: [
-            CarouselSlider.builder(
-              itemCount: base64Images.length,
-              itemBuilder: (context, index, realIndex) {
-                final imageBytes = base64Decode(base64Images[index]);
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.memory(
-                      imageBytes,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                    ),
-                  ),
-                );
-              },
-              options: CarouselOptions(
-                autoPlay: true,
-                autoPlayInterval: const Duration(seconds: 3),
-                autoPlayAnimationDuration: const Duration(milliseconds: 800),
-                enlargeCenterPage: true,
-                aspectRatio: 16/9,
-                enlargeStrategy: CenterPageEnlargeStrategy.height,
-                viewportFraction: 0.85,
-                onPageChanged: (index, reason) {
-                  setState(() {
-                    _currentSlide = index;
-                  });
-                },
+    return Column(
+      children: [
+        CarouselSlider.builder(
+          itemCount: widget.base64Images.length,
+          itemBuilder: (context, index, realIndex) {
+            final imageBytes = base64Decode(widget.base64Images[index]);
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 8.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+
               ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                base64Images.length,
-                    (index) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: _currentSlide == index ? 12.0 : 8.0,
-                  height: 8.0,
-                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _currentSlide == index ? Colors.green : Colors.grey.shade400,
-                  ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.memory(
+                  imageBytes,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
                 ),
               ),
+            );
+          },
+          options: CarouselOptions(
+            autoPlay: true,
+            autoPlayInterval: const Duration(seconds: 3),
+
+            enlargeCenterPage: true,
+            aspectRatio: 16 / 9,
+            enlargeStrategy: CenterPageEnlargeStrategy.height,
+            viewportFraction: 0.85,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _currentSlide = index;
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            widget.base64Images.length,
+                (index) => AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: _currentSlide == index ? 12.0 : 8.0,
+              height: 8.0,
+              margin: const EdgeInsets.symmetric(horizontal: 4.0),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _currentSlide == index ? Colors.green : Colors.grey.shade400,
+              ),
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 }
+class OurLeadersCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const OurLeadersCard({Key? key, required this.onTap}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.greenAccent.shade200, Colors.deepPurpleAccent.shade400],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 8,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.group, size: 40, color: Colors.white),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Our Leaders",
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Meet the passionate leaders of our club",
+                    style: TextStyle(fontSize: 14, color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 
 class TodayCard extends StatelessWidget {
   final String day;
@@ -293,7 +365,7 @@ class TodayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (day == "saturday" || day == "sunday") {
+    if (day == "sunday") {
       return _buildHolidayCard(context, day.toUpperCase());
     }
     return StreamBuilder<DocumentSnapshot>(

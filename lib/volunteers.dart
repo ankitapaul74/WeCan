@@ -16,6 +16,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
     "wednesday",
     "thursday",
     "friday",
+    "saturday"
   ];
 
   @override

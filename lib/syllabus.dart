@@ -181,31 +181,17 @@ class _SyllabusState extends State<Syllabus> {
 
 
   void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-
-    switch (_currentIndex) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Homescreen()),
-        );
-        break;
-      case 1:
-        break;
-      case 2:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => GalleryPage()),
-        );
-        break;
-      case 3:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => StudentsPage()),
-        );
-        break;
+    if(index==_currentIndex) return;
+    if (index == 3) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => StudentsPage()));
+    } else if (index == 0) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Homescreen()));
+    } else if (index == 2) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => GalleryPage()));
+    } else {
+      setState(() {
+        _currentIndex = index;
+      });
     }
   }
 

@@ -17,10 +17,11 @@ class StudentsPage extends StatefulWidget {
 class _StudentsPageState extends State<StudentsPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _classController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   final DatabaseService _databaseService = DatabaseService();
   int _currentIndex = 3;
-
   bool isLoggedIn = false;
+  String searchQuery = "";
 
   @override
   void initState() {
@@ -34,32 +35,58 @@ class _StudentsPageState extends State<StudentsPage> {
       isLoggedIn = user != null;
     });
   }
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
 
-    switch (_currentIndex) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Homescreen()),
-        );
-        break;
-      case 1:
-       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Syllabus()));
-        break;
-      case 2:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => GalleryPage()),
-        );
-        break;
-      case 3:
-        break;
+  void _onTabTapped(int index) {
+    if (index == _currentIndex) return;
+    if (index == 0) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Homescreen()));
+    } else if (index == 1) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Syllabus()));
+    } else if (index == 2) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => GalleryPage()));
+    } else {
+      setState(() {
+        _currentIndex = index;
+      });
     }
   }
+  Future<void> _deleteStudent(String studentId) async {
 
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Student'),
+          content: Text('Are you sure you want to delete this student?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await _databaseService.deleteStudent(studentId);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Student deleted successfully')),
+                  );
+                  Navigator.pop(context); // Close the dialog after deletion
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error deleting student: $e')),
+                  );
+                  Navigator.pop(context);
+                }
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
   Future<void> _addStudent() async {
 
     showModalBottomSheet(
@@ -148,44 +175,6 @@ class _StudentsPageState extends State<StudentsPage> {
     );
   }
 
-  Future<void> _deleteStudent(String studentId) async {
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Delete Student'),
-          content: Text('Are you sure you want to delete this student?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await _databaseService.deleteStudent(studentId);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Student deleted successfully')),
-                  );
-                  Navigator.pop(context); // Close the dialog after deletion
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error deleting student: $e')),
-                  );
-                  Navigator.pop(context);
-                }
-              },
-              child: Text('Delete'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -202,70 +191,102 @@ class _StudentsPageState extends State<StudentsPage> {
         backgroundColor: Colors.blue,
         centerTitle: true,
       ),
-      body: StreamBuilder<List<Student>>(
-        stream: _databaseService.getStudents(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Text(
-                'No students added yet.',
-                style: TextStyle(fontSize: 20),
-              ),
-            );
-          }
-          final students = snapshot.data!;
-          return ListView.builder(
-            itemCount: students.length,
-            itemBuilder: (context, index) {
-              final student = students[index];
-              return Card(
-                color: Colors.blue.shade50,
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: "Search students by name",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.blue.shade100,
-                    backgroundImage: AssetImage('assets/images/img.png'),
-                  ),
-                  title: Text(
-                    student.name,
-                    style: GoogleFonts.lato(color: Colors.blue, fontSize: 18),
-                  ),
-                  subtitle: Text(
-                    'Class: ${student.studentClass}',
-                    style: TextStyle(fontSize: 17),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => StudentDetailsPage(
-                          studentId: student.id,
-                          studentName: student.name,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<List<Student>>(
+              stream: _databaseService.getStudents(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No students added yet.',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  );
+                }
+                var students = snapshot.data!;
+                students.sort((a, b) => a.studentClass.compareTo(b.studentClass));
+                students = students
+                    .where((student) => student.name.toLowerCase().contains(searchQuery))
+                    .toList();
+                return ListView.builder(
+                  itemCount: students.length,
+                  itemBuilder: (context, index) {
+                    final student = students[index];
+                    return Card(
+                      color: Colors.blue.shade50,
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.blue.shade100,
+                          backgroundImage: AssetImage('assets/images/img.png'),
                         ),
+                        title: Text(
+                          student.name,
+                          style: GoogleFonts.lato(color: Colors.blue, fontSize: 18),
+                        ),
+                        subtitle: Text(
+                          'Class: ${student.studentClass}',
+                          style: TextStyle(fontSize: 17),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => StudentDetailsPage(
+                                studentId: student.id,
+                                studentName: student.name,
+                              ),
+                            ),
+                          );
+                        },
+                        onLongPress: isLoggedIn
+                            ? () {
+                          _deleteStudent(student.id);
+                        }
+                            : null,
                       ),
                     );
                   },
-                  onLongPress: isLoggedIn?() {
-                    _deleteStudent(student.id);
-                  }:null,
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            ),
+          ),
+        ],
       ),
-      floatingActionButton: isLoggedIn? FloatingActionButton(
+      floatingActionButton: isLoggedIn
+          ? FloatingActionButton(
         backgroundColor: Colors.blue,
         onPressed: _addStudent,
         child: Icon(Icons.add, color: Colors.white),
-      ):null,
+      )
+          : null,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
