@@ -35,29 +35,17 @@ class _GalleryPageState extends State<GalleryPage> {
   }
 
   void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-
-    switch (_currentIndex) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Homescreen()),
-        );
-        break;
-      case 1:
-      Navigator.pushReplacement(context,
-      MaterialPageRoute(builder: (context)=>Syllabus()));
-        break;
-      case 2:
-        break;
-      case 3:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => StudentsPage()),
-        );
-        break;
+    if(index==_currentIndex) return;
+    if (index == 3) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => StudentsPage()));
+    } else if (index == 1) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Syllabus()));
+    } else if (index == 0) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Homescreen()));
+    } else {
+      setState(() {
+        _currentIndex = index;
+      });
     }
   }
 
