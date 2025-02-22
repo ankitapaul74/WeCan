@@ -219,6 +219,8 @@ class LeaderDetailsScreen extends StatelessWidget {
 
           ),
         ],
+
+
       ),
     );
   }
